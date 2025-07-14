@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  prestashop:
+    image: webdevops/php-apache:5.6
+    container_name: prestashop-1612
+    ports:
+      - "8080:80"
+    volumes:
+      - ./prestashop:/app
+    environment:
+      - WEB_DOCUMENT_ROOT=/app
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.6
+    container_name: mysql-1612
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: prestashop
+      MYSQL_USER: prestashop
+      MYSQL_PASSWORD: prestashop
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:

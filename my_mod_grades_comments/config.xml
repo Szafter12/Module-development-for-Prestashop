@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>my_mod_grades_comments</name>
+	<displayName><![CDATA[My module for comments and grades]]></displayName>
+	<version><![CDATA[1.0.0]]></version>
+	<description><![CDATA[You can add a comments and grades for your products ]]></description>
+	<author><![CDATA[JakubPachut]]></author>
+	<tab><![CDATA[front_office_features]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+</module>
