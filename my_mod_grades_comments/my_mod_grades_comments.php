@@ -74,6 +74,7 @@ class My_mod_grades_comments extends Module
     public function hookDisplayProductTabContent($params)
     {
         $this->processProductTabContent();
+        $this->assignProductTabContent();
         return $this->display(__FILE__, 'displayProductTabContent.tpl');
     }
 
@@ -94,12 +95,16 @@ class My_mod_grades_comments extends Module
         }
     }
 
-    protected function assignProductTabContent() {
+    protected function assignProductTabContent()
+    {
         $enable_grades = Configuration::get('MY_MOD_ENABLE_GRADES');
         $enable_comments = Configuration::get('MY_MOD_ENABLE_COMMENTS');
 
         $id_product = Tools::getValue('id_product');
-        $comment = Tools::getValue('comment');
-        $comment = Tools::getValue('grade');
+        $comments = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'my_mod_comment WHERE id_product = ' . (int)$id_product);
+
+        $this->context->smarty->assign("enable_grades", $enable_grades);
+        $this->context->smarty->assign("enable_comments", $enable_comments);
+        $this->context->smarty->assign("comments", $comments);
     }
 }
