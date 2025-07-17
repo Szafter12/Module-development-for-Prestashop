@@ -12,7 +12,7 @@ class My_mod_grades_comments extends Module
     {
         $this->name = 'my_mod_grades_comments';
         $this->tab = 'front_office_features';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'JakubPachut';
         $this->need_instance = 0;
 
@@ -21,7 +21,7 @@ class My_mod_grades_comments extends Module
         parent::__construct();
 
         $this->displayName = $this->l('My module for comments and grades');
-        $this->description = $this->l('You can add a comments and grades for your products ');
+        $this->description = $this->l('You can add a comments and grades for your products');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module');
 
@@ -30,14 +30,48 @@ class My_mod_grades_comments extends Module
 
     public function install()
     {
-        parent::install();
-        $this->registerHook('displayProductTabContent');
+        if (!parent::install())
+            return false;
+
+        $sql_file = dirname(__FILE__) . '/install/install.sql';
+        if (!$this->loadSQLFile($sql_file))
+            return false;
+
+        if (!$this->registerHook('displayProductTabContent'))
+            return false;
+
+        Configuration::updateValue('MYMOD_GRADES', '1');
+        Configuration::updateValue('MYMOD_COMMENTS', '1');
+
         return true;
     }
 
     public function uninstall()
     {
-        return parent::uninstall();
+        if (!parent::uninstall())
+            return false;
+
+        $sql_file = dirname(__FILE__) . '/install/uninstall.sql';
+        if (!$this->loadSQLFile($sql_file))
+            return false;
+
+        Configuration::deleteByName('MYMOD_GRADES');
+        Configuration::deleteByName('MYMOD_COMMENTS');
+        return true;
+    }
+
+    public function loadSQLFile($sql_file)
+    {
+        $sql_content = file_get_contents($sql_file);
+        $sql_content = str_replace('PREFIX_', _DB_PREFIX_, $sql_content);
+        $sql_requests = preg_split("/;\s*[\r\n]+/", $sql_content);
+
+        foreach ($sql_requests as $request) {
+            if (!empty($request) && !Db::getInstance()->execute(trim($request))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function getContent()
@@ -92,6 +126,14 @@ class My_mod_grades_comments extends Module
             ];
 
             Db::getInstance()->insert('my_mod_comment', $insert);
+
+            $id_product = (int)Tools::getValue('id_product');
+            $product = new Product($id_product, true, $this->context->language->id);
+
+            $link = $this->context->link->getProductLink($product);
+            $link .= '?new_comment=1';
+
+            Tools::redirect($link);
         }
     }
 
@@ -99,10 +141,18 @@ class My_mod_grades_comments extends Module
     {
         $enable_grades = Configuration::get('MY_MOD_ENABLE_GRADES');
         $enable_comments = Configuration::get('MY_MOD_ENABLE_COMMENTS');
+        $new_comment_posted = null;
+        if (Tools::getValue('new_comment') !== null) {
+            $new_comment_posted = Tools::getValue('new_comment') == 1;
+        }
 
         $id_product = Tools::getValue('id_product');
         $comments = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'my_mod_comment WHERE id_product = ' . (int)$id_product);
 
+        $this->context->controller->addCSS($this->_path . "views/css/mymodcomment.css", 'all');
+        $this->context->controller->addJS($this->_path . "views/js/mymodcomment.js");
+
+        $this->context->smarty->assign("new_comment_posted", $new_comment_posted);
         $this->context->smarty->assign("enable_grades", $enable_grades);
         $this->context->smarty->assign("enable_comments", $enable_comments);
         $this->context->smarty->assign("comments", $comments);
