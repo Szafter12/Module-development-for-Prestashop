@@ -147,7 +147,7 @@ class My_mod_grades_comments extends Module
         }
 
         $id_product = Tools::getValue('id_product');
-        $comments = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'my_mod_comment WHERE id_product = ' . (int)$id_product);
+        $comments = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'my_mod_comment WHERE id_product = ' . (int)$id_product . ' ORDER BY date_add DESC LIMIT 3');
 
         $this->context->controller->addCSS($this->_path . "views/css/mymodcomment.css", 'all');
         $this->context->controller->addJS($this->_path . "views/js/mymodcomment.js");

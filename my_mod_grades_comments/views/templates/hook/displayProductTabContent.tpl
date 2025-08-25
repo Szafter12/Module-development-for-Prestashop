@@ -13,6 +13,16 @@
 </div>
 
 <div class="rte">
+    {assign var=params value=[
+    'module_action' => 'list',
+    'id_product'=> $smarty.get.id_product
+    ]}
+    <a href="{$link->getModuleLink('my_mod_grades_comments', 'comments', $params)}">
+        {l s='See all comments' mod='my_mod_grades_comments'}
+    </a>
+</div>
+
+<div class="rte">
     <form action="" method="POST" id="comment-form">
         {if $enable_grades eq 1}
             <div class="form-group">
